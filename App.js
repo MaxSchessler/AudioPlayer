@@ -24,21 +24,22 @@ export default function App() {
 
   // async function to handle the playpause event when the touchable opacity is pressed.
   const handlePlayPause = async () => {
-    // if playbackInstance is not null: 
-    // asynchronously pause if isPlaying is true : asynchronously play if isPlaying is false - music is paused 
+    // if playbackInstance is not null:
+    // asynchronously pause if isPlaying is true : asynchronously play if isPlaying is false - music is paused
     if (playbackInstance) {
-      isPlaying ? await playbackInstance.pauseAsync() : await playbackInstance.playAsync();
+      isPlaying
+        ? await playbackInstance.pauseAsync()
+        : await playbackInstance.playAsync();
       // update boolen isPlaying state var
       setIsPlaying(!isPlaying);
     }
-  }
+  };
 
   onPlaybackStatusUpdate = (status) => {
     this.setState({
-      isBuffering: status.isBuffering
+      isBuffering: status.isBuffering,
     });
-  }
-
+  };
 
   // aysnc loadAudio()
   // instanciate new Audio.Sound() object and set the source to be the mp3 in music file
@@ -47,14 +48,13 @@ export default function App() {
     playbackInstance.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
     await playbackInstance.loadAsync(
       "music/ukulele.mp3",
-      { shouldPlay: isPlaying, volume: 1},
+      { shouldPlay: isPlaying, volume: 1 },
       false
     );
     setPlaybackInstance(playbackInstance);
+  };
 
-  }
-
-  // JSX Component 
+  // JSX Component
   return (
     <View style={styles.container}>
       <Text style={styles.Heading}>Aloha Music</Text>
