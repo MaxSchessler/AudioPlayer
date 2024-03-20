@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { Audio, interruptionModeAndroid, interruptionModeIOS } from "expo-av";
 import { useState, useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
 
@@ -7,15 +8,15 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackInstance, setPlaybackInstance] = useState(null);
 
-  useEffect(() => {
+  useEffect((Audio) => {
     async function setupAudio() {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playThroughEarpieceAndroid: true,
-        interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
         playsInSilentModeIOS: true,
         shouldDuckAndroid: true,
-        interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       });
       loadAudio();
     }
@@ -47,7 +48,7 @@ export default function App() {
     const playbackInstance = new Audio.Sound();
     playbackInstance.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
     await playbackInstance.loadAsync(
-      "music/ukulele.mp3",
+      require("./music/ukulele.mp3"),
       { shouldPlay: isPlaying, volume: 1 },
       false
     );
