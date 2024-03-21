@@ -1,39 +1,36 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
-import { Audio, interruptionModeAndroid, interruptionModeIOS } from "expo-av";
-import { useState, useEffect } from "react";
+import React, { Component } from "react";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { Feather } from "@expo/vector-icons";
+import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 
-export default function App() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackInstance, setPlaybackInstance] = useState(null);
+export default class App extends Component {
+  state = {
+    isPlaying: false,
+    playbackInstance: null,
+    volume: 1.0,
+    isBuffering: false,
+  };
 
-  useEffect((Audio) => {
-    async function setupAudio() {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playThroughEarpieceAndroid: true,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-      });
-      loadAudio();
-    }
-    setupAudio();
-  }, []);
+  async componentDidMount() {
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playThroughEarpieceAndroid: true,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+    });
+    this.loadAudio();
+  }
 
-  // async function to handle the playpause event when the touchable opacity is pressed.
-  const handlePlayPause = async () => {
-    // if playbackInstance is not null:
-    // asynchronously pause if isPlaying is true : asynchronously play if isPlaying is false - music is paused
-    if (playbackInstance) {
-      isPlaying
-        ? await playbackInstance.pauseAsync()
-        : await playbackInstance.playAsync();
-      // update boolen isPlaying state var
-      setIsPlaying(!isPlaying);
-    }
+  handlePlayPause = async () => {
+    const { isPlaying, playbackInstance } = this.state;
+    isPlaying
+      ? await playbackInstance.pauseAsync()
+      : await playbackInstance.playAsync();
+    this.setState({
+      isPlaying: !isPlaying,
+    });
   };
 
   onPlaybackStatusUpdate = (status) => {
@@ -42,36 +39,38 @@ export default function App() {
     });
   };
 
-  // aysnc loadAudio()
-  // instanciate new Audio.Sound() object and set the source to be the mp3 in music file
-  const loadAudio = async () => {
+  async loadAudio() {
     const playbackInstance = new Audio.Sound();
-    playbackInstance.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-    await playbackInstance.loadAsync(
-      require("./music/ukulele.mp3"),
-      { shouldPlay: isPlaying, volume: 1 },
-      false
-    );
-    setPlaybackInstance(playbackInstance);
-  };
+    const source = require("./music/ukulele.mp3");
+    const status = {
+      shouldPlay: this.state.isPlaying,
+      volume: this.state.volume,
+    };
+    playbackInstance.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate);
+    await playbackInstance.loadAsync(source, status, false);
+    this.setState({
+      playbackInstance,
+    });
+  }
 
-  // JSX Component
-  return (
-    <View style={styles.container}>
-      <Text style={styles.Heading}>Aloha Music</Text>
-      <Image style={styles.Images} source={require("./images/ukulele.png")} />
-      <TouchableOpacity
-        style={styles.PlayPauseButton}
-        onPress={handlePlayPause}
-      >
-        {isPlaying ? (
-          <Feather name="pause" size={32} color="#000" />
-        ) : (
-          <Feather name="play" size={32} color="#000" />
-        )}
-      </TouchableOpacity>
-    </View>
-  );
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.Heading}>Aloha Music</Text>
+        <Image style={styles.Images} source={require("./images/ukulele.png")} />
+        <TouchableOpacity
+          style={styles.PlayPauseButton}
+          onPress={this.handlePlayPause}
+        >
+          {this.state.isPlaying ? (
+            <Feather name="pause" size={32} color="#000" />
+          ) : (
+            <Feather name="play" size={32} color="#000" />
+          )}
+        </TouchableOpacity>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
